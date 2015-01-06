@@ -1,0 +1,17 @@
+---
+- name: Install Apache HTTP
+  yum: name=httpd state=present
+
+- name: Configure Kibana to use with Apache
+  template: src=kibana3_apache.conf.js dest=/etc/httpd/conf.d
+
+- name: Create a Kibana login
+  htpasswd:
+    path: /etc/nginx/conf.d/kibana.htpasswd
+    name: vagrant
+    password: vagrant
+  notify:
+    - restart http
+
+- name: Start Apache and enable on boot
+  service: name=httpd state=started enabled=yes

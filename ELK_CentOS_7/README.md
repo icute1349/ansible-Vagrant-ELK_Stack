@@ -85,6 +85,7 @@ $ sudo cp ~/kibana3.conf /etc/httpd/conf.d/</p>
 <p>4. Create a login that will be used to access Kibana:
 $ sudo htpasswd -c /etc/httpd/conf.d/kibana-htpasswd vagrant
 # I used the password "vagrant"</p>
+# This added "vagrant:<password>" to the file /etc/httpd/conf.d/kibana-htpasswd, where password is hashed.
 
 <p>5. Start Apache and enable on boot</p>
 <p>$ sudo systemctl start httpd.service

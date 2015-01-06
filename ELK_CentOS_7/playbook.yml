@@ -1,4 +1,10 @@
 ---
 - hosts: all
   sudo: yes
-#  roles:
+  roles:
+    - common
+    - java
+    - elastic
+    - kibana
+    - apache
+    - ntp
