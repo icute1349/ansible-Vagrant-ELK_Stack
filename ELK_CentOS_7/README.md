@@ -96,6 +96,119 @@ $ sudo systemctl enable httpd.service</p>
 <h4>Errors</h4>
 1.  No Kibana welcome screen.  Only the Apache welcome screen.
 
+<h4>To DO:</h4>
+<ul>
+<li>Remove kibana tarball</li>
+</ul>
+
+<h3>Install Logstash</h3>
+<p>1. Create a new Logstash Yum Repository:
+$ sudo vi /etc/yum.repos.d/logstash.repo</p>
+
+<p>2. Add the below:
+[logstash-1.4]
+name=logstash repository for 1.4.x packages
+baseurl=http://packages.elasticsearch.org/logstash/1.4/centos
+gpgcheck=1
+gpgkey=http://packages.elasticsearch.org/GPG-KEY-elasticsearch
+enabled=1
+</p>
+
+<p>3. Install Logstash</p>
+<p>$ sudo yum install -y logstash-1.4.2</p>
+
+<p>4. Generate the SSL Certificates to Use with Logstash Forwarder</p>
+<p>$cd /etc/pki/tls; sudo openssl req -x509 -batch -nodes -days 3650 -newkey rsa:2048 -keyout private/logstash-forwarder.key -out certs/logstash-forwarder.crt</p>
+
+<p>5. Create the Logstash Input config file with the below content:</p>
+<p>sudo vi /etc/logstash/conf.d/01-lumberjack-input.conf</p>
+<p>input {
+  lumberjack {
+    port => 5000
+    type => "logs"
+    ssl_certificate => "/etc/pki/tls/certs/logstash-forwarder.crt"
+    ssl_key => "/etc/pki/tls/private/logstash-forwarder.key"
+  }
+}</p>
+
+<p>6. Create a config file to filter syslog messages with the below</p>
+<p>$ /etc/logstash/conf.d/10-syslog.conf</p>
+<p>filter {
+  if [type] == "syslog" {
+    grok {
+      match => { "message" => "%{SYSLOGTIMESTAMP:syslog_timestamp} %{SYSLOGHOST:syslog_hostname} %{DATA:syslog_program}(?:\[%{POSINT:syslog_pid}\])?: %{GREEDYDATA:syslog_message}" }
+      add_field => [ "received_at", "%{@timestamp}" ]
+      add_field => [ "received_from", "%{host}" ]
+    }
+    syslog_pri { }
+    date {
+      match => [ "syslog_timestamp", "MMM  d HH:mm:ss", "MMM dd HH:mm:ss" ]
+    }
+  }
+}</p>
+
+<p>7. Create a Configuration file for output</p>
+<p>$ sudo vi /etc/logstash/conf.d/30-lumberjack-output.conf</p>
+<p>output {
+  elasticsearch { host => localhost }
+  stdout { codec => rubydebug }
+}
+</p>
+
+<h3>Install Logstash Forwarder</h3>
+<p>1. Copy SSL Certificate and Logstash Forwarder Package</p>
+<p>$ scp /etc/pki/tls/certs/logstash-forwarder.crt user@server_private_IP:/tmp
+</p>
+
+<p>2. Install Logstash Forwarder Package into the Home Directory</p>
+<p>$ curl -O http://packages.elasticsearch.org/logstashforwarder/centos/logstash-forwarder-0.3.1-1.x86_64.rpm</p>
+
+<p>3. Install the Forwarder init script</p>
+<p>$ cd /etc/init.d/; sudo curl -o logstash-forwarder http://logstashbook.com/code/4/logstash_forwarder_redhat_init</p>
+<p>And change the permissions</p>
+<p>$ sudo chmod +x logstash-forwarder
+</p>
+
+<p>4. Install init script dependent file</p>
+<p>$ sudo curl -o /etc/sysconfig/logstash-forwarder http://logstashbook.com/code/4/logstash_forwarder_redhat_sysconfig</p>
+
+<p>5. Edit the script to include the below</p>
+<p>$ sudo vi /etc/sysconfig/logstash-forwarder</p>
+<p>$ sed -i 's/^.LOGSTASH_FORWARDER_OPTIONS=/(LOGSTASH_FORWARDER_OPTIONS="-config /etc/logstash-forwarder -spool-size 100/")/' /etc/sysconfig/logstash-forwarder # this script is not working....</p>
+<p>LOGSTASH_FORWARDER_OPTIONS="-config /etc/logstash-forwarder -spool-size 100"</p>
+
+<p>6. Copy the Downloaded SSL Certificate to certs directory</p>
+<p>$ sudo cp /tmp/logstash-forwarder.crt /etc/pki/tls/certs/</p>
+
+<p>7. Configure the Forwarder on the Server and Input the Private IP Address of your Logstash Server</p>
+<p>$ sudo vi /etc/logstash-forwarder</p>
+<p>{
+  "network": {
+    "servers": [ "logstash_server_private_IP:5000" ],
+    "timeout": 15,
+    "ssl ca": "/etc/pki/tls/certs/logstash-forwarder.crt"
+  },
+  "files": [
+    {
+      "paths": [
+        "/var/log/messages",
+        "/var/log/secure"
+       ],
+      "fields": { "type": "syslog" }
+    }
+   ]
+}</p>
+
+<p>8. Add the Forwarder service with chkconfig</p>
+<p>$ sudo chkconfig --add logstash-forwarder</p>
+
+<p>9. Start the Logstash Forwarder</p>
+<p>$ sudo service logstash-forwarder start</p>
+
+<p>You should now be able to connect to Kibana</p>
+
+<h4>Bugs</h4>
+<p>1. Cannot start logstash-forwarder.  When I run "$ sudo systemctl start logstash-forwarder", get this error message: "msg: /etc/init.d/logstash-forwarder: line 25: /lib/init/vars.sh: No such file or directory"</p>
 
 <h4>Resources</h4>
 <ul>

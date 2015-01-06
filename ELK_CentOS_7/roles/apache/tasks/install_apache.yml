@@ -11,7 +11,7 @@
     name: vagrant
     password: vagrant
   notify:
-    - restart http
+    - restart httpd
 
 - name: Start Apache and enable on boot
   service: name=httpd state=started enabled=yes

@@ -1,0 +1,28 @@
+---
+- name: Download the Logstash Forwarder RPM
+  get_url: url=http://packages.elasticsearch.org/logstashforwarder/centos/logstash-forwarder-0.3.1-1.x86_64.rpm dest=/home/vagrant/
+
+#- name: Install the Forwarder package
+  #command: rpm -ivh /home/vagrant/logstash-forwarder-0.3.1-1.x86_64.rpm
+
+- name: Install Logstash Forwarder init script
+  get_url: url=http://logstashbook.com/code/4/logstash_forwarder_redhat_init dest=/etc/init.d/ mode=0775
+
+- name: Install init script to /etc/sysconfig
+  get_url: url=http://logstashbook.com/code/4/logstash_forwarder_redhat_sysconfig dest=/etc/sysconfig/
+
+- name: Configure /etc/sysconfig/logstash-forwarder
+  template: src=logstash-forwarder.j2 dest=/etc/sysconfig/logstash-forwarder
+
+- name: Copy SSL certificate to the right location
+  command: cp /tmp/logstash-forwarder.crt /etc/pki/tls/certs/
+
+# Currently set to localhost
+- name: Configure the /etc/logstash-forwarder
+  template: src=server_forwarder.conf.j2 dest=/etc/logstash-forwarder
+
+- name: Add the Forwarder service
+  command: chkconfig --add logstash-forwarder
+
+- name: Start the Forwarder service
+  service: name=logstash-forwarder state=started enabled=yes

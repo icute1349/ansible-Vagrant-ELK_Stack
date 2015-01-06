@@ -2,9 +2,11 @@
 - hosts: all
   sudo: yes
   roles:
+    - ntp
     - common
     - java
     - elastic
     - kibana
     - apache
-    - ntp
+    - logstash
+    - logstash-forwarder
