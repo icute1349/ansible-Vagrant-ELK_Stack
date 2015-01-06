@@ -5,6 +5,9 @@
 - name: Install Logstash
   yum: name=logstash-1.4.2 state=present
 
+- name: Start Logstash and enable on boot
+  service: name=logstash state=started enabled=yes
+  
 - name: Generate SSL Certificate and key pair
   command: openssl req -x509 -batch -nodes -days 3650 -newkey rsa:2048 -keyout private/logstash-forwarder.key -out certs/logstash-forwarder.crt
   args:

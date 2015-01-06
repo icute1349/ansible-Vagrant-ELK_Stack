@@ -1,5 +1,5 @@
-<VirtualHost localhost:80>
-  ServerName localhost
+<VirtualHost vagrant:80>
+  ServerName vagrant
 
   DocumentRoot /var/www/kibana3
   <Directory /var/www/kibana3>

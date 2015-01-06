@@ -1,6 +1,11 @@
 <h1>ELK Stack on CentOS 7 x86 64</h1>
 <h3>Description:</h3>
-<p>An ELK stack provisioned with Vagrant and Ansible.  Below are all my notes from this project.  These are all the steps I went through to build this stack manually from the command line before coverting to Ansible.</p>
+<p>First iteration of an ELK stack provisioned with Vagrant and Ansible.  Below are all my notes from this project.  These are all the steps I went through to build this stack manually from the command line before coverting to Ansible.</p>
+<p>NOTE: This stack is not for production....yet</p>
+<h4>General TODO:</h4>
+<ul>
+<li>Edit for firewall settings</li>
+</ul>
 
 <h2>Prereqs</h2>
 <p>TODO: include link to CentOS_7 box I am using.</p>
@@ -12,15 +17,15 @@ $ vagrant init <box_name></li>
 </ol>
 
 <h3>Install Java 7</h3>
-<p>1. Install OpenJDK 7:
-	$ sudo yum install -y java-1.7.0-openjdk
+<p>1. Install OpenJDK 7:</p>
+<p>$ sudo yum install -y java-1.7.0-openjdk
 </p>
 
 <h3>Install Elasticsearch 1.1.1</h3>
-<p>1. Import the Elasticsearch public GPG key into rpm:
-$ sudo rpm --import http://packages.elasticsearch.org/GPG-KEY-elasticsearch</p>
-<p>2. Create a new yum repository file for Elasticsearch:
-$ sudo vi /etc/yum.repos.d/elasticsearch.repo</p>
+<p>1. Import the Elasticsearch public GPG key into rpm:</p>
+<p>$ sudo rpm --import http://packages.elasticsearch.org/GPG-KEY-elasticsearch</p>
+<p>2. Create a new yum repository file for Elasticsearch:</p>
+<p>$ sudo vi /etc/yum.repos.d/elasticsearch.repo</p>
 
 <p>Add the following:
 [elasticsearch-1.1]
@@ -30,71 +35,82 @@ gpgcheck=1
 gpgkey=http://packages.elasticsearch.org/GPG-KEY-elasticsearch
 enabled=1</p>
 
-<p>3. Install Elasticsearch(Elastic):
-$ sudo yum install -y elasticsearch-1.1.1</p>
+<p>3. Install Elasticsearch(Elastic):</p>
+<p>$ sudo yum install -y elasticsearch-1.1.1</p>
 
-<p>4. Edit the Elastic Configs:
-$ sudo vi /etc/elasticsearch/elasticsearch.yml</p>
+<p>4. Edit the Elastic Configs:</p>
+<p>$ sudo vi /etc/elasticsearch/elasticsearch.yml</p>
 
-<p>4a. Disable dynamic scripts by adding this line:
-script.disable_dynamic: true</p>
+<p>4a. Disable dynamic scripts by adding this line:</p>
+<p>script.disable_dynamic: true</p>
 
-<p>4b. Restrict outside access:
-Change "# network.host: 192.168.0.1" to "network.host: localhost"</p>
+<p>4b. Restrict outside access:</p>
+<p>Change "# network.host: 192.168.0.1" to "network.host: localhost"</p>
 
-<p>4c. Disable multicast by uncommenting the following line:
-discovery.zen.ping.multicast.enabled: false</p>
+<p>4c. Disable multicast by uncommenting the following line:</p>
+<p>discovery.zen.ping.multicast.enabled: false</p>
 
-<p>5. Start Elastic and enable on boot:
-$ sudo systemctl start elasticsearch.service
-$ sudo systemctl enable elasticsearch.service</p>
+<p>5. Start Elastic and enable on boot:</p>
+<p>$ sudo systemctl start elasticsearch.service</p>
+<p>$ sudo systemctl enable elasticsearch.service</p>
 
 <h3>Install Kibana 3.01</h3>
-<p>1. Download Kibana:
-$ curl -O https://download.elasticsearch.org/kibana/kibana/kibana-3.0.1.tar.gz</p>
+<p>1. Download Kibana:</p>
+<p>$ curl -O https://download.elasticsearch.org/kibana/kibana/kibana-3.0.1.tar.gz</p>
 
-<p>2. Extract the archive:
-$ tar xvf kibana-3.0.1.tar.gz</p>
+<p>2. Extract the archive:</p>
+<p>$ tar xvf kibana-3.0.1.tar.gz</p>
 
-<p>3. Edit the Kibana config file and change the elasticsearch server URL port from 9200 to 80:
-$ vi ~/kibana-3.0.1/config.js
-Change 'elasticsearch: "http://"+window.location.hostname+":9200",' to
+<p>3. Edit the Kibana config file and change the elasticsearch server URL port from 9200 to 80:</p>
+<p>$ vi ~/kibana-3.0.1/config.js</p>
+<p>Change 'elasticsearch: "http://"+window.location.hostname+":9200",' to
 elasticsearch: "http://"+window.location.hostname+":80",
 </p>
 
-<p>4. Create a directory and copy the Kibana installation into it:
-$ sudo mkdir -p /var/www/kibana3
-$ sudo cp -R ~/kibana-3.0.1/* /var/www/kibana3/</p>
+<p>4. Create a directory and copy the Kibana installation into it:</p>
+<p>$ sudo mkdir -p /var/www/kibana3</p>
+<p>$ sudo cp -R ~/kibana-3.0.1/* /var/www/kibana3/</p>
 
 <h3>Install Apache to serve our Kibana Installation</h3>
-<p>1. Install Apache HTTP:
-$ sudo yum install -y httpd</p>
+
+<p>1. Install Apache HTTP:</p>
+<p>$ sudo yum install -y httpd</p>
 
 <p>2. Configure Apache to proxy the port 80 requests to port 9200.  We do this by configuring an Apache VirtualHost.</p>
-$ wget https://assets.digitalocean.com/articles/logstash/kibana3.conf # this is a sample VirtualHost configuration from Digital Ocean
+<p>$ wget https://assets.digitalocean.com/articles/logstash/kibana3.conf # this is a sample VirtualHost configuration from Digital Ocean</p>
 
-<p>2a. Change VirtualHost and ServerName values to your domain name:
-$ vi kibana3.conf
-Changed <VirtualHost FQDN:80> to <VirtualHost localhost:80>
-Changed "ServerName FQDN" to "ServerName localhost"
-# make sure you change root to the directory where we installed Kibana</p>
+<p>2a. Change VirtualHost and ServerName values to your domain name:</p>
+<p>$ vi kibana3.conf</p>
+<p>Changed <VirtualHost FQDN:80> to <VirtualHost localhost:80></p>
+<p>Changed "ServerName FQDN" to "ServerName localhost"</p>
+<p># make sure you change root to the directory where we installed Kibana</p>
 
-<p>3. Copy this config file to your Apache configuration:
-$ sudo cp ~/kibana3.conf /etc/httpd/conf.d/</p>
+<p>3. Copy this config file to your Apache configuration:</p>
+<p>$ sudo cp ~/kibana3.conf /etc/httpd/conf.d/</p>
 
-<p>4. Create a login that will be used to access Kibana:
-$ sudo htpasswd -c /etc/httpd/conf.d/kibana-htpasswd vagrant
-# I used the password "vagrant"</p>
-# This added "vagrant:<password>" to the file /etc/httpd/conf.d/kibana-htpasswd, where password is hashed.
+<p>4. Create a login that will be used to access Kibana:</p>
+<p>$ sudo htpasswd -c /etc/httpd/conf.d/kibana-htpasswd vagrant</p>
+<p># I used the password "vagrant"</p>
+<p># This added "vagrant:<password>" to the file /etc/httpd/conf.d/kibana-htpasswd, where password is hashed.</p>
 
 <p>5. Start Apache and enable on boot</p>
-<p>$ sudo systemctl start httpd.service
-$ sudo systemctl enable httpd.service</p>
+<p>$ sudo systemctl start httpd.service</p>
+<p>$ sudo systemctl enable httpd.service</p>
 
 <p>Kibana should now be accessible via "localhost" or the private_ip address we gave Vagrant.</p>
 
 <h4>Errors</h4>
-1.  No Kibana welcome screen.  Only the Apache welcome screen.
+<p>1.  No Kibana welcome screen.  Only the Apache welcome screen.</p>
+
+<p>I did not copy the files correctly in step 4 of install Kibana.  Copied the directory and not the contents of the directory.  Can't figure out how to copy the files via ansible.  The bash command does not work with the ansible command module.  I used command: mv instead of cp ....No.</p>
+<p>Attempting to use the shell module with "sudo cp -R ~/kibana-3.0.1/* /var/www/kibana3/"....Didnt work.  Copied the dir not the contents.  The same command works on the command line in the machine.  Trying again using the raw module.....It works.  Files are now in place but still no access to kibana.</p> 
+
+<p>I need to edit my FQDN in kibana.conf.  I had it set as "localhost" but my hostname is vagrant.  Also, needed to specify the full path in my template task.  The file on the node was the local .j2 name....Nothing...reloaded apache....Ok, now I get a loging screen.  I enter vagrant/vagrant and get "Internal Server Error".  I used nginx instead of httpd in the file path to store the htpasswd....Now I get a restart error at the "Create Kibana login" task, "ERROR: change handler (restart httpd) is not defined".  Ran vagrant provision again and no error but also no change.  Reloaded httpd....nothing.</p>
+
+Fixed---
+<p>2. On first provision at "Create Kibana login" get this error: "ERROR: change handler (restart httpd) is not defined".  I think this is because my task to start and enable httpd is only after the first notify.  No, I moved the start apache task before the notify and got the same error.</p>
+
+<p>Thought it might be a syntax mismatch between my notify module value and the value in my handler....Yes.  Needed to match exactly the notify call and the name within the handler.</p>
 
 <h4>To DO:</h4>
 <ul>
@@ -102,8 +118,8 @@ $ sudo systemctl enable httpd.service</p>
 </ul>
 
 <h3>Install Logstash</h3>
-<p>1. Create a new Logstash Yum Repository:
-$ sudo vi /etc/yum.repos.d/logstash.repo</p>
+<p>1. Create a new Logstash Yum Repository:</p>
+<p>$ sudo vi /etc/yum.repos.d/logstash.repo</p>
 
 <p>2. Add the below:
 [logstash-1.4]
@@ -154,6 +170,11 @@ enabled=1
   stdout { codec => rubydebug }
 }
 </p>
+
+<h5>Bugs</h5>
+Fixed---
+<p>1. On first run at "Create a congiuration file to filter output" task get this error: "ERROR: change handler (restart logstash) is not defined".  Moved the start logstash task above the notify...didn't work.  See same apache bug.</p>
+
 
 <h3>Install Logstash Forwarder</h3>
 <p>1. Copy SSL Certificate and Logstash Forwarder Package</p>
@@ -209,6 +230,9 @@ enabled=1
 
 <h4>Bugs</h4>
 <p>1. Cannot start logstash-forwarder.  When I run "$ sudo systemctl start logstash-forwarder", get this error message: "msg: /etc/init.d/logstash-forwarder: line 25: /lib/init/vars.sh: No such file or directory"</p>
+<p>2. Additional ansible provisioning fails at "Install the Forwarder package" with this error message "failed: [default] => {"changed": true, "cmd": ["rpm", "-ivh", "/home/vagrant/logstash-forwarder-0.3.1-1.x86_64.rpm"], "delta": "0:00:00.014631", "end": "2015-01-06 13:10:31.592836", "rc": 1, "start": "2015-01-06 13:10:31.578205", "warnings": ["Consider using yum module rather than running rpm"]}
+stderr: 	package logstash-forwarder-0.3.1-1.x86_64 is already installed
+stdout: Preparing...                          ########################################"</p>
 
 <h4>Resources</h4>
 <ul>

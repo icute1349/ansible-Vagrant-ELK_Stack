@@ -2,8 +2,8 @@
 - name: Download the Logstash Forwarder RPM
   get_url: url=http://packages.elasticsearch.org/logstashforwarder/centos/logstash-forwarder-0.3.1-1.x86_64.rpm dest=/home/vagrant/
 
-#- name: Install the Forwarder package
-  #command: rpm -ivh /home/vagrant/logstash-forwarder-0.3.1-1.x86_64.rpm
+- name: Install the Forwarder package
+  command: rpm -ivh /home/vagrant/logstash-forwarder-0.3.1-1.x86_64.rpm
 
 - name: Install Logstash Forwarder init script
   get_url: url=http://logstashbook.com/code/4/logstash_forwarder_redhat_init dest=/etc/init.d/ mode=0775

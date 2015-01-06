@@ -4,6 +4,7 @@
   args:
     chdir: /home/vagrant/
     creates: /home/vagrant/kibana-3.0.1
+
 - name: Extract the Kibana archive
   unarchive: src=/home/vagrant/kibana-3.0.1.tar.gz dest=/home/vagrant/ copy=no
 
@@ -14,4 +15,4 @@
   command: mkdir -p /var/www/kibana3
 
 - name: Copy Kibana installation into the new directory
-  command: cp -R /home/vagrant/kibana-3.0.1/ /var/www/kibana3/
+  raw: sudo cp -R /home/vagrant/kibana-3.0.1/* /var/www/kibana3/
