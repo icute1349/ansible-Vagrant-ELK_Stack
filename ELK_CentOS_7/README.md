@@ -99,38 +99,11 @@ elasticsearch: "http://"+window.location.hostname+":80",
 
 <p>Kibana should now be accessible via "localhost" or the private_ip address we gave Vagrant.</p>
 
-<h4>Errors</h4>
-<p>1.  No Kibana welcome screen.  Only the Apache welcome screen.</p>
-
-<p>I did not copy the files correctly in step 4 of install Kibana.  Copied the directory and not the contents of the directory.  Can't figure out how to copy the files via ansible.  The bash command does not work with the ansible command module.  I used command: mv instead of cp ....No.</p>
-<p>Attempting to use the shell module with "sudo cp -R ~/kibana-3.0.1/* /var/www/kibana3/"....Didnt work.  Copied the dir not the contents.  The same command works on the command line in the machine.  Trying again using the raw module.....It works.  Files are now in place but still no access to kibana.</p> 
-
-<p>I need to edit my FQDN in kibana.conf.  I had it set as "localhost" but my hostname is vagrant.  Also, needed to specify the full path in my template task.  The file on the node was the local .j2 name....Nothing...reloaded apache....Ok, now I get a loging screen.  I enter vagrant/vagrant and get "Internal Server Error".  I used nginx instead of httpd in the file path to store the htpasswd....Now I get a restart error at the "Create Kibana login" task, "ERROR: change handler (restart httpd) is not defined".  Ran vagrant provision again and no error but also no change.  Reloaded httpd....nothing.</p>
-
-Taking a new approach.  Because I really have no idea what is wrong. Adding the following forwarded ports: 80/8080-kibana, 9200/9200-elastic, 9292/9292 -logstash...nothing.  Turn off firewall and reload....Nothing.  Apache default page at localhost:8080 and internal server error at 192.168.33.98.  Edited /config.js and updated the elasticsearch server to the private ip 'elasticsearch: "http://192.168.33.98:80"'...nothing.
-
-Changed FQDN in config.js to 127.0.0.1...nothing.  Corrected filename /etc/httpd/conf.d/kibana-htpasswd from /etc/httpd/conf.d/kibana.htpasswd, config.js looks for kibana-htpasswd...nothing.  Changed FQDN in kibana.conf to "localhost"....nothing.
-
-Changed FQDN to "vagrant" which is the hostname....now the browser prompts for a login, I enter vagrant/vagrant and then I get the Internal Server Error.  Added "owner=root group=root mode=0644" permissions to kibana3.conf and config.js....nothing Internal Sever Error.
-
-Config files:
-Elasticsearch: /etc/elasticsearch/elasticsearch.yml
-Kibana-Apache: /etc/httpd/conf.d/
-
-Looked at Apache logs and see this:
-[authn_file:error] [pid 7268] (13)Permission denied: [client 10.0.2.2:56070] AH01620: Could not open password file: /etc/httpd/conf.d/kibana-htpasswd
-Looks like the permissions are wrong on my password? FINALLY.  I changed the permissions to 0644 and the dashboard comes up.  
-
-But 2 new errors...
-1) "Upgrade Required Your version of Elasticsearch is too old. Kibana requires Elasticsearch 0.90.9 or above."
-2) "Error Could not reach http://localhost:80/_nodes. If you are using a proxy, ensure it is configured correctly"
+<h4>Issues</h4>
+1) "Upgrade Required Your version of Elasticsearch is too old. Kibana requires Elasticsearch 0.90.9 or above." - occurs when I try to access Kibana server.
+2) "Error Could not reach http://localhost:80/_nodes. If you are using a proxy, ensure it is configured correctly" - additional error message from Kibana.
 
 These could be more permissions issues.
-
-Fixed---
-<p>2. On first provision at "Create Kibana login" get this error: "ERROR: change handler (restart httpd) is not defined".  I think this is because my task to start and enable httpd is only after the first notify.  No, I moved the start apache task before the notify and got the same error.</p>
-
-<p>Thought it might be a syntax mismatch between my notify module value and the value in my handler....Yes.  Needed to match exactly the notify call and the name within the handler.</p>
 
 <h4>To DO:</h4>
 <ul>
@@ -191,11 +164,6 @@ enabled=1
 }
 </p>
 
-<h5>Bugs</h5>
-Fixed---
-<p>1. On first run at "Create a congiuration file to filter output" task get this error: "ERROR: change handler (restart logstash) is not defined".  Moved the start logstash task above the notify...didn't work.  See same apache bug.</p>
-
-
 <h3>Install Logstash Forwarder</h3>
 <p>1. Copy SSL Certificate and Logstash Forwarder Package</p>
 <p>$ scp /etc/pki/tls/certs/logstash-forwarder.crt user@server_private_IP:/tmp
@@ -248,7 +216,7 @@ Fixed---
 
 <p>You should now be able to connect to Kibana</p>
 
-<h4>Bugs</h4>
+<h4>Issues</h4>
 <p>1. Cannot start logstash-forwarder.  When I run "$ sudo systemctl start logstash-forwarder", get this error message: "msg: /etc/init.d/logstash-forwarder: line 25: /lib/init/vars.sh: No such file or directory"</p>
 <p>2. Additional ansible provisioning fails at "Install the Forwarder package" with this error message "failed: [default] => {"changed": true, "cmd": ["rpm", "-ivh", "/home/vagrant/logstash-forwarder-0.3.1-1.x86_64.rpm"], "delta": "0:00:00.014631", "end": "2015-01-06 13:10:31.592836", "rc": 1, "start": "2015-01-06 13:10:31.578205", "warnings": ["Consider using yum module rather than running rpm"]}
 stderr: 	package logstash-forwarder-0.3.1-1.x86_64 is already installed
