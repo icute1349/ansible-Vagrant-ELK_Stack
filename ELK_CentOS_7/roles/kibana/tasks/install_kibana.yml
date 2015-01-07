@@ -9,7 +9,7 @@
   unarchive: src=/home/vagrant/kibana-3.0.1.tar.gz dest=/home/vagrant/ copy=no
 
 - name: Configure Kibana
-  template: src=config.js.j2 dest=/home/vagrant/kibana-3.0.1/config.js
+  template: src=config.js.j2 dest=/home/vagrant/kibana-3.0.1/config.js owner=root group=root mode=0644
 
 - name: Copy Kibana installation into a new directory - create directory
   command: mkdir -p /var/www/kibana3

@@ -39,7 +39,7 @@ enabled=1</p>
 <p>$ sudo yum install -y elasticsearch-1.1.1</p>
 
 <p>4. Edit the Elastic Configs:</p>
-<p>$ sudo vi /etc/elasticsearch/elasticsearch.yml</p>
+<p>$ n</p>
 
 <p>4a. Disable dynamic scripts by adding this line:</p>
 <p>script.disable_dynamic: true</p>
@@ -106,6 +106,30 @@ elasticsearch: "http://"+window.location.hostname+":80",
 <p>Attempting to use the shell module with "sudo cp -R ~/kibana-3.0.1/* /var/www/kibana3/"....Didnt work.  Copied the dir not the contents.  The same command works on the command line in the machine.  Trying again using the raw module.....It works.  Files are now in place but still no access to kibana.</p> 
 
 <p>I need to edit my FQDN in kibana.conf.  I had it set as "localhost" but my hostname is vagrant.  Also, needed to specify the full path in my template task.  The file on the node was the local .j2 name....Nothing...reloaded apache....Ok, now I get a loging screen.  I enter vagrant/vagrant and get "Internal Server Error".  I used nginx instead of httpd in the file path to store the htpasswd....Now I get a restart error at the "Create Kibana login" task, "ERROR: change handler (restart httpd) is not defined".  Ran vagrant provision again and no error but also no change.  Reloaded httpd....nothing.</p>
+
+Taking a new approach.  Because I really have no idea what is wrong. Adding the following forwarded ports: 80/8080-kibana, 9200/9200-elastic, 9292/9292 -logstash...nothing.  Turn off firewall and reload....Nothing.  Apache default page at localhost:8080 and internal server error at 192.168.33.98.  Edited /config.js and updated the elasticsearch server to the private ip 'elasticsearch: "http://192.168.33.98:80"'...nothing.
+
+Changed FQDN in config.js to 127.0.0.1...nothing.  Corrected filename /etc/httpd/conf.d/kibana-htpasswd from /etc/httpd/conf.d/kibana.htpasswd, config.js looks for kibana-htpasswd...nothing.  Changed FQDN in kibana.conf to "localhost"....nothing.
+
+Changed FQDN to "vagrant" which is the hostname....now the browser prompts for a login, I enter vagrant/vagrant and then I get the Internal Server Error.  Added "owner=root group=root mode=0644" permissions to kibana3.conf and config.js....nothing Internal Sever Error.
+
+Config files:
+Elasticsearch: /etc/elasticsearch/elasticsearch.yml
+Kibana-Apache: /etc/httpd/conf.d/
+
+Looked at Apache logs and see this:
+[authn_file:error] [pid 7268] (13)Permission denied: [client 10.0.2.2:56070] AH01620: Could not open password file: /etc/httpd/conf.d/kibana-htpasswd
+Looks like the permissions are wrong on my password? FINALLY.  I changed the permissions to 0644 and the dashboard comes up.  
+
+But 2 new errors...
+1) "Upgrade Required Your version of Elasticsearch is too old. Kibana requires Elasticsearch 0.90.9 or above."
+2) "Error Could not reach http://localhost:80/_nodes. If you are using a proxy, ensure it is configured correctly"
+
+
+
+
+
+
 
 Fixed---
 <p>2. On first provision at "Create Kibana login" get this error: "ERROR: change handler (restart httpd) is not defined".  I think this is because my task to start and enable httpd is only after the first notify.  No, I moved the start apache task before the notify and got the same error.</p>
