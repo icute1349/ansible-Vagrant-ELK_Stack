@@ -8,5 +8,5 @@
     - elastic
     - kibana
     - apache
-#    - logstash
-#    - logstash-forwarder
+    - logstash
+    - logstash-forwarder

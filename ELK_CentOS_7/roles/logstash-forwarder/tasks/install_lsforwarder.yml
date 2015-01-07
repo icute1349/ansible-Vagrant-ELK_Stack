@@ -8,7 +8,7 @@
 - name: Install Logstash Forwarder init script
   get_url: url=http://logstashbook.com/code/4/logstash_forwarder_redhat_init dest=/etc/init.d/ mode=0775
 
-- name: Install init script to /etc/sysconfig
+- name: Install init script companion to /etc/sysconfig
   get_url: url=http://logstashbook.com/code/4/logstash_forwarder_redhat_sysconfig dest=/etc/sysconfig/
 
 - name: Configure /etc/sysconfig/logstash-forwarder

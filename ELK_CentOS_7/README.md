@@ -125,11 +125,7 @@ But 2 new errors...
 1) "Upgrade Required Your version of Elasticsearch is too old. Kibana requires Elasticsearch 0.90.9 or above."
 2) "Error Could not reach http://localhost:80/_nodes. If you are using a proxy, ensure it is configured correctly"
 
-
-
-
-
-
+These could be more permissions issues.
 
 Fixed---
 <p>2. On first provision at "Create Kibana login" get this error: "ERROR: change handler (restart httpd) is not defined".  I think this is because my task to start and enable httpd is only after the first notify.  No, I moved the start apache task before the notify and got the same error.</p>
