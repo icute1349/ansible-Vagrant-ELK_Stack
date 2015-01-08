@@ -4,6 +4,7 @@
   roles:
 #    - ntp
     - common
+    - go
     - java
     - elastic
     - kibana
