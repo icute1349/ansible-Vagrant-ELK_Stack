@@ -217,11 +217,19 @@ enabled=1
 <p>You should now be able to connect to Kibana</p>
 
 <h4>Issues</h4>
+------------- Fixed
 <p>1. Cannot start logstash-forwarder.  When I run "$ sudo systemctl start logstash-forwarder", get this error message: "msg: /etc/init.d/logstash-forwarder: line 25: /lib/init/vars.sh: No such file or directory"</p>
 <p>2. Additional ansible provisioning fails at "Install the Forwarder package" with this error message "failed: [default] => {"changed": true, "cmd": ["rpm", "-ivh", "/home/vagrant/logstash-forwarder-0.3.1-1.x86_64.rpm"], "delta": "0:00:00.014631", "end": "2015-01-06 13:10:31.592836", "rc": 1, "start": "2015-01-06 13:10:31.578205", "warnings": ["Consider using yum module rather than running rpm"]}
 stderr: 	package logstash-forwarder-0.3.1-1.x86_64 is already installed
 stdout: Preparing...                          ########################################"</p>
+---------------- Fixed
+<p>No logs show up in kibana.  Recieve the following error message in the Kibana console: "No results There were no results because no indices were found that match your selected time span".  Output of curl "ip:9200/_access?pretty" is "{}".</p>
 
+Tried installing ruby beacuse of out rubydebug codec used in output 30-lumberjack-output.conf...no change.  Changed output value in same value from "localhost" to the private IP address Im using....no change.
+
+Changed the servers value in "/etc/logstash-forwarder" file from "http://<private.ip>:5000" to "<private.ip>:5000".  It works, now getting logs.
+
+Destroyed and booted VM back up, keeping edits to /etc/logstash-forwarder and 30-lumberjack-output.conf (but did not install Ruby).  Still works.
 <h4>Resources</h4>
 <ul>
 <li>https://www.digitalocean.com/community/tutorials/how-to-use-logstash-and-kibana-to-centralize-logs-on-centos-7</li>

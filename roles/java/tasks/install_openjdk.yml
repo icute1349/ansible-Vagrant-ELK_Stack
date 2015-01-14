@@ -1,0 +1,4 @@
+---
+- name: Install OpenJDK
+  sudo: yes
+  yum: name=java-1.7.0-openjdk state=present
