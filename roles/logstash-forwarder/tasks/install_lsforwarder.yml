@@ -9,7 +9,6 @@
 - name: Install Logstash Forwarder init script to /etc/init.d/logstash-forwarder
   sudo: yes
   template: src=logstash-forwarder-init.j2 dest=/etc/init.d/logstash-forwarder
-#  get_url: url=http://logstashbook.com/code/4/logstash_forwarder_redhat_init dest=/etc/init.d/logstash-forwarder #owner=root group=root mode=0775
 
 - name: Install init script companion to /etc/sysconfig/logstash-forwarder
   sudo: yes

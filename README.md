@@ -1,17 +1,18 @@
 <h1>ELK Stack on CentOS 7 x86 64</h1>
 <h3>Description:</h3>
 <p>First iteration of an ELK stack provisioned with Vagrant and Ansible.  Below are all my notes from this project.  These are all the steps I went through to build this stack manually from the command line before coverting to Ansible.</p>
-<p>NOTE: This stack is not for production....yet</p>
-<h4>General TODO:</h4>
+<p>NOTE: This is not for production</p>
+<h4>General To Do:</h4>
 <ul>
-<li>Edit for firewall settings</li>
+<li>Refactor</li>
+<li>Remove tarballs after install</li>
 </ul>
 
 <h2>Prereqs</h2>
-<p>TODO: include link to CentOS_7 box I am using.</p>
+<p>You can find the CentOS 7 box I used via Atlas: mjp182/CentOS_7</p>
 <ol>
 <li>Create a Vagrantfile in the root of your project directory:
-$ vagrant init <box_name></li>
+$ vagrant init mjp182/CentOS_7</li>
 <li>Configure the Vagrantfile.</li>
 <li>Create Ansible playbook.yml and ansible.cfg files in the root directory</li>
 </ol>
@@ -73,7 +74,7 @@ elasticsearch: "http://"+window.location.hostname+":80",
 
 <h3>Install Apache to serve our Kibana Installation</h3>
 
-<p>1. Install Apache HTTP:</p>
+<p>1. Install Apache HTTP: (I actually decided to Use nginx)</p>
 <p>$ sudo yum install -y httpd</p>
 
 <p>2. Configure Apache to proxy the port 80 requests to port 9200.  We do this by configuring an Apache VirtualHost.</p>
@@ -98,17 +99,6 @@ elasticsearch: "http://"+window.location.hostname+":80",
 <p>$ sudo systemctl enable httpd.service</p>
 
 <p>Kibana should now be accessible via "localhost" or the private_ip address we gave Vagrant.</p>
-
-<h4>Issues</h4>
-1) "Upgrade Required Your version of Elasticsearch is too old. Kibana requires Elasticsearch 0.90.9 or above." - occurs when I try to access Kibana server.
-2) "Error Could not reach http://localhost:80/_nodes. If you are using a proxy, ensure it is configured correctly" - additional error message from Kibana.
-
-These could be more permissions issues.
-
-<h4>To DO:</h4>
-<ul>
-<li>Remove kibana tarball</li>
-</ul>
 
 <h3>Install Logstash</h3>
 <p>1. Create a new Logstash Yum Repository:</p>
@@ -159,7 +149,7 @@ enabled=1
 <p>7. Create a Configuration file for output</p>
 <p>$ sudo vi /etc/logstash/conf.d/30-lumberjack-output.conf</p>
 <p>output {
-  elasticsearch { host => localhost }
+  elasticsearch { host => "localhost" }
   stdout { codec => rubydebug }
 }
 </p>
@@ -173,7 +163,7 @@ enabled=1
 <p>$ curl -O http://packages.elasticsearch.org/logstashforwarder/centos/logstash-forwarder-0.3.1-1.x86_64.rpm</p>
 
 <p>3. Install the Forwarder init script</p>
-<p>$ cd /etc/init.d/; sudo curl -o logstash-forwarder http://logstashbook.com/code/4/logstash_forwarder_redhat_init</p>
+<p>See included file</p>
 <p>And change the permissions</p>
 <p>$ sudo chmod +x logstash-forwarder
 </p>
@@ -216,20 +206,6 @@ enabled=1
 
 <p>You should now be able to connect to Kibana</p>
 
-<h4>Issues</h4>
-------------- Fixed
-<p>1. Cannot start logstash-forwarder.  When I run "$ sudo systemctl start logstash-forwarder", get this error message: "msg: /etc/init.d/logstash-forwarder: line 25: /lib/init/vars.sh: No such file or directory"</p>
-<p>2. Additional ansible provisioning fails at "Install the Forwarder package" with this error message "failed: [default] => {"changed": true, "cmd": ["rpm", "-ivh", "/home/vagrant/logstash-forwarder-0.3.1-1.x86_64.rpm"], "delta": "0:00:00.014631", "end": "2015-01-06 13:10:31.592836", "rc": 1, "start": "2015-01-06 13:10:31.578205", "warnings": ["Consider using yum module rather than running rpm"]}
-stderr: 	package logstash-forwarder-0.3.1-1.x86_64 is already installed
-stdout: Preparing...                          ########################################"</p>
----------------- Fixed
-<p>No logs show up in kibana.  Recieve the following error message in the Kibana console: "No results There were no results because no indices were found that match your selected time span".  Output of curl "ip:9200/_access?pretty" is "{}".</p>
-
-Tried installing ruby beacuse of out rubydebug codec used in output 30-lumberjack-output.conf...no change.  Changed output value in same value from "localhost" to the private IP address Im using....no change.
-
-Changed the servers value in "/etc/logstash-forwarder" file from "http://<private.ip>:5000" to "<private.ip>:5000".  It works, now getting logs.
-
-Destroyed and booted VM back up, keeping edits to /etc/logstash-forwarder and 30-lumberjack-output.conf (but did not install Ruby).  Still works.
 <h4>Resources</h4>
 <ul>
 <li>https://www.digitalocean.com/community/tutorials/how-to-use-logstash-and-kibana-to-centralize-logs-on-centos-7</li>
