@@ -19,11 +19,11 @@
 
 - name: Configure Elasticsearch - Restrict outside access to instance
   sudo: yes
-  lineinfile: "dest=/etc/elasticsearch/elasticsearch.yml regexp='# discovery.zen.ping.multicast.enabled: false' line='discovery.zen.ping.multicast.enabled: false'"
+  lineinfile: "dest=/etc/elasticsearch/elasticsearch.yml regexp='# discovery.zen.ping.multicast.enabled: false' insertafter='# discovery.zen.ping.multicast.enabled: false' line='discovery.zen.ping.multicast.enabled: false' state=present"
 
 - name: Configure Elasticsearch - Restrict outside access
   sudo: yes
-  lineinfile: "dest=/etc/elasticsearch/elasticsearch.yml regexp='# network.host: 192.168.0.1' line='network.host: localhost'"
+  lineinfile: "dest=/etc/elasticsearch/elasticsearch.yml regexp='# network.host: 192.168.0.1' insertafter='# network.host: 192.168.0.1' line='network.host: localhost'"
 
 - name: Start Elasticsearch and enable on boot
   sudo: yes

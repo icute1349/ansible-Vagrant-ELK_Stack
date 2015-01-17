@@ -2,10 +2,8 @@
 - hosts: all
   sudo: yes
   roles:
-#    - ntp
     - client_local_repo
     - common
-    - go
     - java
     - elastic
     - kibana

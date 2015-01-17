@@ -1,12 +1,18 @@
 ---
 - name: Configure client to connent to local YUM repository
-  template: src=CentOS-Base.repo.j2 dest=/etc/yum.repos.d/CentOS-Base.repo #user=root group=root mode=0644
+  template: src=CentOS-Base.repo.j2 dest=/etc/yum.repos.d/CentOS-Base.repo #owner=root group=root mode=0644
+
+- name: Configure client to connect to local EPEL repository
+  template: src=epel.repo.j2 dest=/etc/yum.repos.d/epel.repo
 
 - name: Turn off fastestmirror plugin
-  template: src=fastestmirror.conf.j2 dest=/etc/yum/pluginconf.d/fastestmirror.conf #user=root group=root mode=0644
+  template: src=fastestmirror.conf.j2 dest=/etc/yum/pluginconf.d/fastestmirror.conf #owner=root group=root mode=0644
 
 - name: Disable SELinux
-  lineinfile: dest=/etc/sysconfig/selinux regexp='SELINUX=permissive' line='SELINUX=disabled'
+  lineinfile: dest=/etc/sysconfig/selinux regexp='SELINUX=permissive' state=absent
+
+- name: Disable SELinux
+  lineinfile: dest=/etc/sysconfig/selinux line='SELINUX=disabled' state=present
 
 - name: Clean cache
   sudo: yes

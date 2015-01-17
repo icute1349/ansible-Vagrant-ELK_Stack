@@ -34,6 +34,6 @@
   sudo: yes
   service: name=logstash state=started enabled=yes
 
-# Currently copies to localhost with cp not scp
-- name: Copy the SSL Certificate to remote nodes
-  command: cp /etc/pki/tls/certs/logstash-forwarder.crt /tmp
+- name: Store a copy of the SSL Certificate to distribute to nodes
+  sudo: yes
+  fetch: src=/etc/pki/tls/certs/logstash-forwarder.crt dest=tmp/logstash-forwarder.crt flat=yes
