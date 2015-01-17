@@ -4,7 +4,7 @@
 <p>NOTE: This is not for production</p>
 
 <h2>Prereqs:</h2>
-<p>You can find the CentOS 7 box I used via Atlas: mjp182/CentOS_7</p>
+<p>You can find the CentOS 7 box I used on Atlas: mjp182/CentOS_7</p>
 <ol>
 <li>Create a Vagrantfile in the root of your project directory:
 <pre>$ vagrant init mjp182/CentOS_7</pre></li>
@@ -32,17 +32,17 @@ enabled=1</pre>
 <p>3. Install Elasticsearch(Elastic):</p>
 <pre>$ sudo yum install -y elasticsearch-1.1.1</pre>
 
-<p>4. Edit the Elastic Configs:</p>
+<p>4. Edit the Elasticsearch Config file:</p>
 <ul>
-  <li><p>Disable dynamic scripts by adding this line:</p></li>
-<pre>script.disable_dynamic: true</pre>
+  <li><p>Disable dynamic scripts by adding this line:</p>
+<pre>script.disable_dynamic: true</pre></li>
 
-<li><p>Restrict outside access:</p></li>
-<p>Change "# network.host: 192.168.0.1" to "network.host: localhost"</p>
+<li><p>Restrict outside access:</p>
+<p><pre>Change "# network.host: 192.168.0.1" to "network.host: localhost"</pre></p></li>
 
 <li><p>Disable multicast by uncommenting the following line:</p></li>
 <pre>#discovery.zen.ping.multicast.enabled: false</pre>
-
+</ul>
 <p>5. Start Elasticsearch and enable on boot:</p>
 <pre>$ sudo systemctl start elasticsearch.service</pre>
 <pre>$ sudo systemctl enable elasticsearch.service</pre>
@@ -66,15 +66,15 @@ elasticsearch: "http://"+window.location.hostname+":80",
 
 <h3>Install Apache to serve our Kibana Installation</h3>
 
-<p>1. Install Apache HTTP: (I actually decided to Use nginx)</p>
+<p>1. Install Apache HTTP:</p>
 <pre>$ sudo yum install -y httpd</pre>
 
-<p>2. Configure Apache to proxy the port 80 requests to port 9200.  We do this by configuring an Apache VirtualHost.</p>
+<p>2. Configure Apache to proxy the port 80 requests to port 9200.  We do this by configuring an Apache VirtualHost:</p>
 <pre>$ wget https://assets.digitalocean.com/articles/logstash/kibana3.conf # this is a sample VirtualHost configuration from Digital Ocean</pre>
 
-<p>2a. Change VirtualHost and ServerName values to your domain name:</p>
+<p>2a. Change "VirtualHost" and "ServerName" values to your domain name:</p>
 <pre>$ vi kibana3.conf</pre>
-<p>Changed <VirtualHost FQDN:80> to <VirtualHost localhost:80></p>
+<p>Changed "VirtualHost FQDN:80" to "VirtualHost localhost:80"</p>
 <p>Changed "ServerName FQDN" to "ServerName localhost"</p>
 <p>Make sure you change root to the directory where we installed Kibana</p>
 
@@ -86,7 +86,7 @@ elasticsearch: "http://"+window.location.hostname+":80",
 <p># I used the password "vagrant"</p>
 <p># This added "vagrant:<password>" to the file /etc/httpd/conf.d/kibana-htpasswd, where password is hashed.</p>
 
-<p>5. Start Apache and enable on boot</p>
+<p>5. Start Apache and enable on boot:</p>
 <pre>$ sudo systemctl start httpd.service</pre>
 <pre>$ sudo systemctl enable httpd.service</pre>
 
@@ -105,10 +105,10 @@ gpgkey=http://packages.elasticsearch.org/GPG-KEY-elasticsearch
 enabled=1
 </pre>
 
-<p>3. Install Logstash</p>
+<p>3. Install Logstash:</p>
 <pre>$ sudo yum install -y logstash-1.4.2</pre>
 
-<p>4. Generate the SSL Certificates to Use with Logstash Forwarder</p>
+<p>4. Generate the SSL Certificates to Use with Logstash Forwarder:</p>
 <pre>$ cd /etc/pki/tls; sudo openssl req -x509 -batch -nodes -days 3650 -newkey rsa:2048 -keyout private/logstash-forwarder.key -out certs/logstash-forwarder.crt</pre>
 
 <p>5. Create the Logstash Input config file with the below content:</p>
@@ -147,28 +147,28 @@ enabled=1
 </pre></p>
 
 <h3>Install Logstash Forwarder</h3>
-<p>1. Copy SSL Certificate and Logstash Forwarder Package</p>
+<p>1. Copy SSL Certificate and Logstash Forwarder Package:</p>
 <pre>$ scp /etc/pki/tls/certs/logstash-forwarder.crt user@server_private_IP:/tmp</pre>
 
-<p>2. Install Logstash Forwarder Package into the Home Directory</p>
+<p>2. Install Logstash Forwarder Package into the Home Directory:</p>
 <pre>$ curl -O http://packages.elasticsearch.org/logstashforwarder/centos/logstash-forwarder-0.3.1-1.x86_64.rpm</pre>
 
-<p>3. Install the Forwarder init script</p>
-<p>See roles/logstash-forwarder/templates/logstash-forwarder-init.j2</p>
+<p>3. Install the Forwarder init script:</p>
+<p>You can find the script I used in "roles/logstash-forwarder/templates/logstash-forwarder-init.j2"</p>
 <p>And change the permissions</p>
 <pre>$ sudo chmod +x logstash-forwarder</pre>
 
-<p>4. Install init script dependent file</p>
+<p>4. Install init script dependent file:</p>
 <pre>$ sudo curl -o /etc/sysconfig/logstash-forwarder http://logstashbook.com/code/4/logstash_forwarder_redhat_sysconfig</pre>
 
-<p>5. Edit the script to include the below</p>
+<p>5. Edit the script to include the below:</p>
 <pre>$ sudo vi /etc/sysconfig/logstash-forwarder</pre>
 <p><pre>LOGSTASH_FORWARDER_OPTIONS="-config /etc/logstash-forwarder -spool-size 100"</pre></p>
 
-<p>6. Copy the Downloaded SSL Certificate to certs directory</p>
+<p>6. Copy the Downloaded SSL Certificate to certs directory:</p>
 <pre>$ sudo cp /tmp/logstash-forwarder.crt /etc/pki/tls/certs/</pre>
 
-<p>7. Configure the Forwarder on the Server and Input the Private IP Address of your Logstash Server</p>
+<p>7. Configure the Forwarder on the Server and Input the Private IP Address of your Logstash Server:</p>
 <pre>$ sudo vi /etc/logstash-forwarder</pre>
 <p><pre>{
   "network": {
@@ -187,15 +187,17 @@ enabled=1
    ]
 }</pre></p>
 
-<p>8. Add the Forwarder service with chkconfig</p>
+<p>8. Add the Forwarder service with chkconfig:</p>
 <pre>$ sudo chkconfig --add logstash-forwarder</pre>
 
-<p>9. Start the Logstash Forwarder</p>
+<p>9. Start the Logstash Forwarder:</p>
 <pre>$ sudo service logstash-forwarder start</pre>
 
-<p>You should now be able to connect to Kibana</p>
+<p>You're done!  Go check out your Kibana dashboard!</p>
 
 <h4>Resources</h4>
 <ul>
-<li>https://www.digitalocean.com/community/tutorials/how-to-use-logstash-and-kibana-to-centralize-logs-on-centos-7</li>
+<li>How to Use Logstash and Kibana to Centralize logs on CentOS 7: https://www.digitalocean.com/community/tutorials/how-to-use-logstash-and-kibana-to-centralize-logs-on-centos-7</li>
+<li>Logstash docs: http://logstash.net/docs/1.4.2/</li>
+<li>Elasticsearch docs: http://www.elasticsearch.org/guide/</li>
 </ul>
