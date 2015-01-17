@@ -2,11 +2,6 @@
 <h3>Description:</h3>
 <p>This is an ELK stack that uses an nginx web server and forwards logs with the logstash-forwarder.  Below are all my notes from this project.  These are all the steps I went through to build this stack manually from the command line before writing the Ansible roles.</p>
 <p>NOTE: This is not for production</p>
-<h4>General To Do:</h4>
-<ul>
-<li>Refactor:</li>
-<li>Remove tarballs after install</li>
-</ul>
 
 <h2>Prereqs:</h2>
 <p>You can find the CentOS 7 box I used via Atlas: mjp182/CentOS_7</p>
