@@ -1,4 +1,4 @@
-<h1>ELK Stack on CentOS 7 x86 64</h1>
+<h1>ELK Stack on CentOS 7 x86_64 1.0.0</h1>
 <h3>Description:</h3>
 <p>This is an ELK stack that uses an nginx web server and forwards logs with the logstash-forwarder.  Below are all my notes from this project.  These are all the steps I went through to build this stack manually from the command line before writing the Ansible roles.</p>
 <p>NOTE: This is not for production</p>
@@ -21,29 +21,29 @@
 <pre>$ sudo rpm --import http://packages.elasticsearch.org/GPG-KEY-elasticsearch</pre>
 <p>2. Create a new yum repository file for Elasticsearch:</p>
 <pre>$ sudo vi /etc/yum.repos.d/elasticsearch.repo</pre>
-<p>Add the following:
-[elasticsearch-1.1]
+<p>Add the following:</p>
+<pre>[elasticsearch-1.1]
 name=Elasticsearch repository for 1.1.x packages
 baseurl=http://packages.elasticsearch.org/elasticsearch/1.1/centos
 gpgcheck=1
 gpgkey=http://packages.elasticsearch.org/GPG-KEY-elasticsearch
-enabled=1</p>
+enabled=1</pre>
 
 <p>3. Install Elasticsearch(Elastic):</p>
 <pre>$ sudo yum install -y elasticsearch-1.1.1</pre>
 
 <p>4. Edit the Elastic Configs:</p>
+<ul>
+  <li><p>Disable dynamic scripts by adding this line:</p></li>
+<pre>script.disable_dynamic: true</pre>
 
-<p>4a. Disable dynamic scripts by adding this line:</p>
-<p>script.disable_dynamic: true</p>
-
-<p>4b. Restrict outside access:</p>
+<li><p>Restrict outside access:</p></li>
 <p>Change "# network.host: 192.168.0.1" to "network.host: localhost"</p>
 
-<p>4c. Disable multicast by uncommenting the following line:</p>
-<p>discovery.zen.ping.multicast.enabled: false</p>
+<li><p>Disable multicast by uncommenting the following line:</p></li>
+<pre>#discovery.zen.ping.multicast.enabled: false</pre>
 
-<p>5. Start Elastic and enable on boot:</p>
+<p>5. Start Elasticsearch and enable on boot:</p>
 <pre>$ sudo systemctl start elasticsearch.service</pre>
 <pre>$ sudo systemctl enable elasticsearch.service</pre>
 
@@ -96,14 +96,14 @@ elasticsearch: "http://"+window.location.hostname+":80",
 <p>1. Create a new Logstash Yum Repository:</p>
 <pre>$ sudo vi /etc/yum.repos.d/logstash.repo</pre>
 
-<p>2. Add the below:
-[logstash-1.4]
+<p>2. Add the below:</p>
+<pre>[logstash-1.4]
 name=logstash repository for 1.4.x packages
 baseurl=http://packages.elasticsearch.org/logstash/1.4/centos
 gpgcheck=1
 gpgkey=http://packages.elasticsearch.org/GPG-KEY-elasticsearch
 enabled=1
-</p>
+</pre>
 
 <p>3. Install Logstash</p>
 <pre>$ sudo yum install -y logstash-1.4.2</pre>
@@ -113,18 +113,18 @@ enabled=1
 
 <p>5. Create the Logstash Input config file with the below content:</p>
 <pre>$ sudo vi /etc/logstash/conf.d/01-lumberjack-input.conf</pre>
-<p>input {
+<p><pre>input {
   lumberjack {
     port => 5000
     type => "logs"
     ssl_certificate => "/etc/pki/tls/certs/logstash-forwarder.crt"
     ssl_key => "/etc/pki/tls/private/logstash-forwarder.key"
   }
-}</p>
+}</pre></p>
 
-<p>6. Create a config file to filter syslog messages with the below</p>
-<pre>$ /etc/logstash/conf.d/10-syslog.conf</pre>
-<p>filter {
+<p>6. Create a config file to filter syslog messages with the below:</p>
+<pre>$ sudo vi /etc/logstash/conf.d/10-syslog.conf</pre>
+<p><pre>filter {
   if [type] == "syslog" {
     grok {
       match => { "message" => "%{SYSLOGTIMESTAMP:syslog_timestamp} %{SYSLOGHOST:syslog_hostname} %{DATA:syslog_program}(?:\[%{POSINT:syslog_pid}\])?: %{GREEDYDATA:syslog_message}" }
@@ -136,15 +136,15 @@ enabled=1
       match => [ "syslog_timestamp", "MMM  d HH:mm:ss", "MMM dd HH:mm:ss" ]
     }
   }
-}</p>
+}</pre></p>
 
-<p>7. Create a Configuration file for output</p>
+<p>7. Create a Configuration file for output:</p>
 <pre>$ sudo vi /etc/logstash/conf.d/30-lumberjack-output.conf</pre>
-<p>output {
+<p><pre>output {
   elasticsearch { host => "localhost" }
   stdout { codec => rubydebug }
 }
-</p>
+</pre></p>
 
 <h3>Install Logstash Forwarder</h3>
 <p>1. Copy SSL Certificate and Logstash Forwarder Package</p>
@@ -154,7 +154,7 @@ enabled=1
 <pre>$ curl -O http://packages.elasticsearch.org/logstashforwarder/centos/logstash-forwarder-0.3.1-1.x86_64.rpm</pre>
 
 <p>3. Install the Forwarder init script</p>
-<p>See included file</p>
+<p>See roles/logstash-forwarder/templates/logstash-forwarder-init.j2</p>
 <p>And change the permissions</p>
 <pre>$ sudo chmod +x logstash-forwarder</pre>
 
@@ -163,15 +163,14 @@ enabled=1
 
 <p>5. Edit the script to include the below</p>
 <pre>$ sudo vi /etc/sysconfig/logstash-forwarder</pre>
-<pre>$ sed -i 's/^.LOGSTASH_FORWARDER_OPTIONS=/(LOGSTASH_FORWARDER_OPTIONS="-config /etc/logstash-forwarder -spool-size 100/")/' /etc/sysconfig/logstash-forwarder # this script is not working....</pre>
-<p>LOGSTASH_FORWARDER_OPTIONS="-config /etc/logstash-forwarder -spool-size 100"</p>
+<p><pre>LOGSTASH_FORWARDER_OPTIONS="-config /etc/logstash-forwarder -spool-size 100"</pre></p>
 
 <p>6. Copy the Downloaded SSL Certificate to certs directory</p>
 <pre>$ sudo cp /tmp/logstash-forwarder.crt /etc/pki/tls/certs/</pre>
 
 <p>7. Configure the Forwarder on the Server and Input the Private IP Address of your Logstash Server</p>
 <pre>$ sudo vi /etc/logstash-forwarder</pre>
-<p>{
+<p><pre>{
   "network": {
     "servers": [ "logstash_server_private_IP:5000" ],
     "timeout": 15,
@@ -186,7 +185,7 @@ enabled=1
       "fields": { "type": "syslog" }
     }
    ]
-}</p>
+}</pre></p>
 
 <p>8. Add the Forwarder service with chkconfig</p>
 <pre>$ sudo chkconfig --add logstash-forwarder</pre>
