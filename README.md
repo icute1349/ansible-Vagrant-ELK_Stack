@@ -56,9 +56,9 @@ enabled=1</pre>
 
 <p>3. Edit the Kibana config file and change the elasticsearch server URL port from 9200 to 80:</p>
 <pre>$ vi ~/kibana-3.0.1/config.js</pre>
-<p>Change 'elasticsearch: "http://"+window.location.hostname+":9200",' to
+<p><pre>Change 'elasticsearch: "http://"+window.location.hostname+":9200",' to
 elasticsearch: "http://"+window.location.hostname+":80",
-</p>
+</pre></p>
 
 <p>4. Create a directory and copy the Kibana installation into it:</p>
 <pre>$ sudo mkdir -p /var/www/kibana3</pre>
@@ -71,20 +71,19 @@ elasticsearch: "http://"+window.location.hostname+":80",
 
 <p>2. Configure Apache to proxy the port 80 requests to port 9200.  We do this by configuring an Apache VirtualHost:</p>
 <pre>$ wget https://assets.digitalocean.com/articles/logstash/kibana3.conf # this is a sample VirtualHost configuration from Digital Ocean</pre>
-
-<p>2a. Change "VirtualHost" and "ServerName" values to your domain name:</p>
-<pre>$ vi kibana3.conf</pre>
-<p>Changed "VirtualHost FQDN:80" to "VirtualHost localhost:80"</p>
-<p>Changed "ServerName FQDN" to "ServerName localhost"</p>
-<p>Make sure you change root to the directory where we installed Kibana</p>
+<ul>
+<li><p>Change "VirtualHost" and "ServerName" values to your domain name:</p>
+<pre>$ vi kibana3.conf</pre></li>
+<li><p>For example:<p/>
+<pre><p>Change "VirtualHost FQDN:80" to "VirtualHost localhost:80"</p>
+<p>Change "ServerName FQDN" to "ServerName localhost"</p></pre></li>
+</ul>
 
 <p>3. Copy this config file to your Apache configuration:</p>
 <pre>$ sudo cp ~/kibana3.conf /etc/httpd/conf.d/</pre>
 
 <p>4. Create a login that will be used to access Kibana:</p>
 <pre>$ sudo htpasswd -c /etc/httpd/conf.d/kibana-htpasswd vagrant</pre>
-<p># I used the password "vagrant"</p>
-<p># This added "vagrant:<password>" to the file /etc/httpd/conf.d/kibana-htpasswd, where password is hashed.</p>
 
 <p>5. Start Apache and enable on boot:</p>
 <pre>$ sudo systemctl start httpd.service</pre>
@@ -154,8 +153,8 @@ enabled=1
 <pre>$ curl -O http://packages.elasticsearch.org/logstashforwarder/centos/logstash-forwarder-0.3.1-1.x86_64.rpm</pre>
 
 <p>3. Install the Forwarder init script:</p>
-<p>You can find the script I used in "roles/logstash-forwarder/templates/logstash-forwarder-init.j2"</p>
-<p>And change the permissions</p>
+<p>You can find the script I used in "roles/logstash-forwarder/templates/logstash-forwarder-init.j2".</p>
+<p>And change the permissions:</p>
 <pre>$ sudo chmod +x logstash-forwarder</pre>
 
 <p>4. Install init script dependent file:</p>
