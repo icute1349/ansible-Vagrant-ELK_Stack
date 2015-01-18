@@ -1,7 +1,10 @@
 <h1>ELK Stack on CentOS 7 x86_64 1.0.0</h1>
 <h3>Description:</h3>
-<p>This is an ELK stack that uses an nginx web server and forwards logs with the logstash-forwarder.  Below are all my notes from this project.  These are all the steps I went through to build this stack manually from the command line before writing the Ansible roles.</p>
+<p>This is an ELK stack that uses an nginx web server and forwards logs with the logstash-forwarder.  Below are all my notes from this project.  These are the steps I went through to build this stack manually from the command line before writing the Ansible roles.</p>
 <p>NOTE: This is not for production</p>
+
+<h2>Requirements:</h2>
+<p>Ansible 1.8.2</p>
 
 <h2>Prereqs:</h2>
 <p>You can find the CentOS 7 box I used on Atlas: mjp182/CentOS_7</p>
@@ -64,30 +67,27 @@ elasticsearch: "http://"+window.location.hostname+":80",
 <pre>$ sudo mkdir -p /var/www/kibana3</pre>
 <pre>$ sudo cp -R ~/kibana-3.0.1/* /var/www/kibana3/</pre>
 
-<h3>Install Apache to serve our Kibana Installation</h3>
+<h3>Install nginx to serve our Kibana Installation</h3>
 
-<p>1. Install Apache HTTP:</p>
-<pre>$ sudo yum install -y httpd</pre>
+<p>1. Install nginx:</p>
+<pre>$ sudo yum install -y nginx</pre>
 
-<p>2. Configure Apache to proxy the port 80 requests to port 9200.  We do this by configuring an Apache VirtualHost:</p>
+<p>2. Configure nginx to proxy the port 80 requests to port 9200.  We do this by configuring an nginx server block:</p>
 <pre>$ wget https://assets.digitalocean.com/articles/logstash/kibana3.conf # this is a sample VirtualHost configuration from Digital Ocean</pre>
 <ul>
-<li><p>Change "VirtualHost" and "ServerName" values to your domain name:</p>
+<li><p>Change the "ServerName" value to your domain name:</p>
 <pre>$ vi kibana3.conf</pre></li>
-<li><p>For example:<p/>
-<pre><p>Change "VirtualHost FQDN:80" to "VirtualHost localhost:80"</p>
-<p>Change "ServerName FQDN" to "ServerName localhost"</p></pre></li>
 </ul>
 
-<p>3. Copy this config file to your Apache configuration:</p>
-<pre>$ sudo cp ~/kibana3.conf /etc/httpd/conf.d/</pre>
+<p>3. Copy this config file to your nginx configuration:</p>
+<pre>$ sudo cp ~/kibana3.conf /etc/nginx/conf.d/default.conf</pre>
 
 <p>4. Create a login that will be used to access Kibana:</p>
-<pre>$ sudo htpasswd -c /etc/httpd/conf.d/kibana-htpasswd vagrant</pre>
+<pre>$ sudo htpasswd -c /etc/nginx/conf.d/kibana.myhost.org.htpasswd <your_password></pre>
 
-<p>5. Start Apache and enable on boot:</p>
-<pre>$ sudo systemctl start httpd.service</pre>
-<pre>$ sudo systemctl enable httpd.service</pre>
+<p>5. Start nginx and enable on boot:</p>
+<pre>$ sudo systemctl start nginx.service</pre>
+<pre>$ sudo systemctl enable nginx.service</pre>
 
 <p>Kibana should now be accessible via "localhost" or the private_ip address we gave Vagrant.</p>
 
