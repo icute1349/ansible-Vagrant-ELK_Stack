@@ -1,10 +1,15 @@
 <h1>ELK Stack on CentOS 7 x86_64 1.0.0</h1>
 <h3>Description:</h3>
-<p>This is an ELK stack that uses an nginx web server and forwards logs with the logstash-forwarder.  Below are all my notes from this project.  These are the steps I went through to build this stack manually from the command line before writing the Ansible roles.</p>
+<p>This is an ELK stack that uses an nginx web server and forwards logs with the logstash-forwarder.  Below are my notes from this project.  These are the steps I went through to build this stack manually from the command line before writing the Ansible roles.</p>
 <p>NOTE: This is not for production</p>
 
 <h2>Requirements:</h2>
-<p>Ansible 1.8.2</p>
+<ul>
+<li>Ansible 1.8.2</li>
+<li>Vagrant ~>1.0.0</li>
+<li>VirtualBox</li>
+</ul>
+
 
 <h2>Prereqs:</h2>
 <p>You can find the CentOS 7 box I used on Atlas: mjp182/CentOS_7</p>
@@ -73,9 +78,9 @@ elasticsearch: "http://"+window.location.hostname+":80",
 <pre>$ sudo yum install -y nginx</pre>
 
 <p>2. Configure nginx to proxy the port 80 requests to port 9200.  We do this by configuring an nginx server block:</p>
-<pre>$ wget https://assets.digitalocean.com/articles/logstash/kibana3.conf # this is a sample VirtualHost configuration from Digital Ocean</pre>
+<pre>$ wget https://gist.githubusercontent.com/thisismitch/2205786838a6a5d61f55/raw/f91e06198a7c455925f6e3099e3ea7c186d0b263/nginx.conf # this is a sample server block configuration from Kibana's github repository</pre>
 <ul>
-<li><p>Change the "ServerName" value to your domain name:</p>
+<li><p>Change the "server_name" value to your domain name:</p>
 <pre>$ vi kibana3.conf</pre></li>
 </ul>
 
@@ -165,7 +170,7 @@ enabled=1
 <p><pre>LOGSTASH_FORWARDER_OPTIONS="-config /etc/logstash-forwarder -spool-size 100"</pre></p>
 
 <p>6. Copy the Downloaded SSL Certificate to certs directory:</p>
-<pre>$ sudo cp /tmp/logstash-forwarder.crt /etc/pki/tls/certs/</pre>
+<pre>$ sudo scp /tmp/logstash-forwarder.crt /etc/pki/tls/certs/</pre>
 
 <p>7. Configure the Forwarder on the Server and Input the Private IP Address of your Logstash Server:</p>
 <pre>$ sudo vi /etc/logstash-forwarder</pre>
