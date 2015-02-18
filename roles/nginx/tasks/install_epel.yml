@@ -1,6 +1,0 @@
----
-- name: Install EPEL repository
-  sudo: yes
-  yum: name={{ item }} state=latest
-  with_items:
-    - epel-release
