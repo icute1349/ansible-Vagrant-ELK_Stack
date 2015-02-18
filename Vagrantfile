@@ -13,8 +13,8 @@ Vagrant.configure(2) do |config|
   # config.vm.synced_folder "../data", "/vagrant_data"
   
   config.vm.provider "virtualbox" do |vb|
-     vb.memory = VB_MEM
-     vb.cpus = VB_CPUS
+     vb.memory = VB_MEM # default is "512MB"
+     vb.cpus = VB_CPUS  # default is "1"
    end
 
   config.vm.provision "ansible" do |ansible|

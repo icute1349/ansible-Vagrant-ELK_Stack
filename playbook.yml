@@ -2,10 +2,9 @@
 - hosts: all
   sudo: yes
   roles:
-    - client_local_repo
     - common
-    - java
-    - elastic
+    - java_jdk
+    - elasticsearch
     - kibana
     - nginx
     - logstash
