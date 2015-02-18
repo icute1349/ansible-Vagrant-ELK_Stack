@@ -1,7 +1,7 @@
 ---
 galaxy_info:
   author: Matthew Pontes
-  description: A role to install Elasticsearch on CentOS 7
+  description: Install OpenJDK on CentOS 7
   company: your company (optional)
   license: license (BSD, MIT)
   min_ansible_version: 1.2
@@ -12,7 +12,7 @@ galaxy_info:
     - 7
 
   categories:
-  - monitoring
-
+  - development
+  - system
+  - web
 dependencies: []
-
