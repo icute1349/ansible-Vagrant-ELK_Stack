@@ -1,7 +1,7 @@
 ---
 galaxy_info:
   author: Matthew Pontes
-  description: A role to install Elasticsearch on CentOS 7
+  description: Roles to install Kibana to ELK stack
   company: your company (optional)
   license: license (BSD, MIT)
   min_ansible_version: 1.2
@@ -13,10 +13,10 @@ galaxy_info:
 
   categories:
   - monitoring
+  - web
 
-dependencies:
-  - mjp182.kibana
+dependencies: 
+  - mjp182.elasticsearch
   - mjp182.logstash
   - mjp182.logstash-forwarder
   - mjp182.nginx
-
