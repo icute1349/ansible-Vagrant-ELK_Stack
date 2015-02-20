@@ -1,0 +1,62 @@
+---
+- name: Get build environment for logstash-forwarder
+  yum: name={{ item }} state=present
+  with_items:
+    - ruby-devel
+    - rpm-build
+    - git
+    - gcc
+    - go 
+
+- name: Get gem dependencies to create rpm package
+  remote_user: "{{ logstash_user }}"
+  sudo: no
+  command: bash -lc "gem install fpm pleaserun"
+
+- name: Download the logstash-forwarder git repo
+  sudo_user: "{{ logstash_user }}"
+  git: repo=https://github.com/elasticsearch/logstash-forwarder.git dest=~/logstash-forwarder
+
+- name: Build logstash-forwarder with go
+  command: go build
+  args:
+    chdir: /home/{{ logstash_user}}/logstash-forwarder
+
+- name: Make the logstash-forwarder rpm package
+  remote_user: "{{ logstash_user }}"
+  sudo: no
+  command: bash -lc "make rpm"
+  args:
+    chdir: /home/{{ logstash_user}}/logstash-forwarder
+
+- name: Install the logstash-forwarder package
+  yum: name=/home/{{logstash_user}}/logstash-forwarder/logstash-forwarder-0.4.0-1.x86_64.rpm state=present
+
+- name: Install Logstash Forwarder init script to /etc/init.d/logstash-forwarder
+  sudo: yes
+  template: src=logstash-forwarder-init.j2 dest=/etc/init.d/logstash-forwarder
+
+- name: Install init script companion to /etc/sysconfig/logstash-forwarder
+  sudo: yes
+  get_url: url=http://logstashbook.com/code/4/logstash_forwarder_redhat_sysconfig dest=/etc/sysconfig/logstash-forwarder
+
+- name: Configure /etc/sysconfig/logstash-forwarder
+  sudo: yes
+  template: src=logstash-forwarder.j2 dest=/etc/sysconfig/logstash-forwarder #owner=root group=root mode=0775
+
+- name: Copy SSL certificate to the right location
+  sudo: yes
+  copy: src=roles/mjp182.logstash/files/logstash-forwarder.crt dest=/etc/pki/tls/certs/logstash-forwarder.crt owner=root group=root mode=0644
+
+- name: Configure the /etc/logstash-forwarder
+  sudo: yes
+  template: src=server_forwarder.conf.j2 dest=/etc/logstash-forwarder #owner=root group=root mode=0664
+
+- name: Add the Forwarder service
+  raw: sudo chkconfig --add logstash-forwarder
+
+- name: Start the Forwarder service
+  sudo: yes
+  service: name=logstash-forwarder state=started enabled=yes
+  notify:
+    - restart logstash 

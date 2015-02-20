@@ -1,0 +1,18 @@
+---
+galaxy_info:
+  author: Matthew Pontes
+  description: Role to install logstash-forwarder with an ELK stack.
+  company: your company (optional)
+  license: license (MIT, BSD)
+  min_ansible_version: 1.2
+
+  platforms:
+  - name: EL
+    versions:
+    - 7
+
+  categories:
+  - monitoring
+  - packaging
+
+dependencies: []

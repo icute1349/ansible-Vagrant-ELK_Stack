@@ -1,0 +1,18 @@
+---
+galaxy_info:
+  author: Matthew Pontes
+  description: Role to install Logstash as part of the ELK stack
+  company: your company (optional)
+  license: license (BSD, MIT)
+  min_ansible_version: 1.2
+
+  platforms:
+  - name: EL
+    versions:
+    - 7
+
+  categories:
+  - monitoring
+
+dependencies:
+  - mjp182.java_jdk

@@ -1,11 +1,14 @@
 ---
+# nginx role must preceed the kibana role
+
 - hosts: all
   sudo: yes
+
   roles:
-    - common
-    - java_jdk
-    - elasticsearch
-    - kibana
-    - nginx
-    - logstash
-    - logstash-forwarder
+    - mjp182.common
+    - mjp182.java_jdk
+    - mjp182.elasticsearch
+    - mjp182.nginx
+    - mjp182.kibana
+    - mjp182.logstash
+    - mjp182.logstash-forwarder

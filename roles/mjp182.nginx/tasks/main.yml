@@ -1,0 +1,14 @@
+---
+# These tasks install Nginx and start the Nginx server.
+
+- name: Install Nginx
+  sudo: yes
+  yum: name={{ item }} state=present
+  with_items:
+    - epel-release
+    - nginx
+    - httpd-tools
+
+- name: make sure nginx is running
+  sudo: yes
+  service: name=nginx state=started enabled=yes
