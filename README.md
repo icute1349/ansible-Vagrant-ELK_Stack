@@ -1,4 +1,4 @@
-<h1>ELK Stack on CentOS 7 x86_64 1.0.2</h1>
+<h1>ELK Stack on CentOS 7 x86_64 1.0.3</h1>
 <h3>Description:</h3>
 <p>This is an ELK stack that uses an nginx web server and forwards logs with the logstash-forwarder.  Below are my notes from this project.  These are the steps I went through to build this stack manually from the command line before writing the Ansible roles.</p>
 <p>NOTE: This is not for production</p>
@@ -8,6 +8,9 @@
 
 <h3>Changes in version 1.0.2</h3>
 <p>Refactor logstash-forwarder role.</p>
+
+<h3>Changes in version 1.0.3</h3>
+<p>Add handler to logstash-forwarder role.</p>
 
 <h2>Requirements:</h2>
 <ul>

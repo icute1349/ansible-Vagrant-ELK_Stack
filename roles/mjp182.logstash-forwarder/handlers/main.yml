@@ -1,2 +1,4 @@
 ---
-# handlers file for logstash-forwarder
+- name: restart logstash-forwarder
+  sudo: yes
+  service: name=logstash-forwarder state=restarted
