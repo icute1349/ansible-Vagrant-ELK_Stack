@@ -5,10 +5,10 @@
   sudo: yes
 
   roles:
-    - mjp182.common
+    #- mjp182.common
     - mjp182.java_jdk
-    - mjp182.elasticsearch
-    - mjp182.nginx
-    - mjp182.kibana
+    #- mjp182.elasticsearch
+    #- mjp182.nginx
+    #- mjp182.kibana
     - mjp182.logstash
-    - mjp182.logstash-forwarder
+    #- mjp182.logstash-forwarder
